@@ -32,10 +32,12 @@ ui <- dashboardPage(
                 box(selectInput("a_mode",
                                 "Mode:",
                                 choices = list("yellow_taxi_time_series", "yellow_taxi_by_year")), 
-                    plotOutput("plot1"), width = 12)
+                    plotOutput("plot1"), 
+                    htmlOutput("text1"), width = 12)
+                    
               ),
-              p("According to the yellow taxi time series,trip lengths increased dramaticly in the beginning of 2010 and the middle of 2013, I guess its because the weather of these two periods are too cold or too hot, so people used Taxi more, or there were some events in these two periods. 
-Also, people used taxi more in 2015 compared to the previous years. <br> <br>
+              p("Overall Analysis: According to the yellow taxi time series,trip lengths increased dramaticly in the beginning of 2010 and the middle of 2013, I guess its because the weather of these two periods are too cold or too hot, so people used Taxi more, or there were some events in these two periods. 
+Also, people used taxi more in 2015 compared to the previous years.
                 According to the yellow taxi trip lengths by year, we can tell that the yellow taxi trip lengths are generally increased, but ups and downs frequently, ex. yellow taxi trip lengths decreased from 2013 to 2014, increased from 2014 to 2015, and then decreased from 2015 to 2016.")
       ),
     
@@ -44,19 +46,21 @@ Also, people used taxi more in 2015 compared to the previous years. <br> <br>
                   box(selectInput("b_mode",
                                   "Mode:",
                                   choices = list("green_taxi_time_series", "green_taxi_by_year")), 
-                      plotOutput("plot2"), width = 12)
+                      plotOutput("plot2"),
+                      htmlOutput("text2"), width = 12)
                 ),
-                p("For the green taxi Time Series, because we do not have the data before 08/01/2013, I use zero to replace the trip length. According to the green taxi plot, we can see that there is no dramatic peak for green taxi, which is different from the yellow taxi.<br> <br>
-                   For the gree taxi the green taxi trip lengths by year, we can see the trip length incresed from 2013 to 2015 and decresed from 2015 to 2016.")
+                p("Overall Analysis: For the green taxi Time Series, because we do not have the data before 08/01/2013, I use zero to replace the trip length. According to the green taxi plot, we can see that there is no dramatic peak for green taxi, which is different from the yellow taxi.
+                   For the green taxi the green taxi trip lengths by year, we can see the trip length incresed from 2013 to 2015 and decresed from 2015 to 2016.")
       ),
         tabItem(tabName = "areas",
                 fluidRow(
                   box(selectInput("c_mode",
                                   "Mode:",
                                   choices = list("yellow_taxi_in_different_areas")),
-                      plotOutput("plot3"), width=12)
+                      plotOutput("plot3"), 
+                  htmlOutput("text3"), width = 12)
                 ),
-                p("According to the plot, the trip lengths of Yellow taxi has different trending in Manhattan and Airport from 2009 to 2015. The Airport trip lengths dicreased from 2010, but the trip lengths of Manhattan generally incresed from 2010 to 2015, especially from 2014 to 2015. However, the trip lengths of Manhattan decresed dramaticlly from the beginning of 2015. 
+                p("Overall Analysis: According to the plot, the trip lengths of Yellow taxi has different trending in Manhattan and Airport from 2009 to 2015. The Airport trip lengths dicreased from 2010, but the trip lengths of Manhattan generally incresed from 2010 to 2015, especially from 2014 to 2015. However, the trip lengths of Manhattan decresed dramaticlly from the beginning of 2015. 
 ")
       )
     )
@@ -82,7 +86,18 @@ server <- function(input, output) {
       print(graph)
     }  
   })
-  
+  output$text1 <- renderPrint({
+    
+    if (input$a_mode == "yellow_taxi_time_series") {
+      
+      print("According to the yellow taxi time series,trip lengths increased dramaticly in the beginning of 2010 and the middle of 2013, I guess its because the weather of these two periods are too cold or too hot, so people used Taxi more, or there were some events in these two periods. 
+Also, people used taxi more in 2015 compared to the previous years. ")
+    }
+    
+    if (input$a_mode == "yellow_taxi_by_year") {
+      print("According to the yellow taxi trip lengths by year, we can tell that the yellow taxi trip lengths are generally increased, but ups and downs frequently, ex. yellow taxi trip lengths decreased from 2013 to 2014, increased from 2014 to 2015, and then decreased from 2015 to 2016.")
+    }  
+  })
   output$plot2 <- renderPlot({
     if (input$b_mode == "green_taxi_time_series") {
       graph <- ts.plot(ts(datagreen[,-1], start = c(2013,1), frequency = 12), gpars = list(xlab = " ", ylab = " ", lty=1))
@@ -98,15 +113,29 @@ server <- function(input, output) {
       print(graph)
     }
   })
+  output$text2 <- renderPrint({
+    if (input$b_mode == "green_taxi_time_series") {
+      print("For the green taxi Time Series, because we do not have the data before 08/01/2013, I use zero to replace the trip length. According to the green taxi plot, we can see that there is no dramatic peak for green taxi, which is different from the yellow taxi.")
+    }
+    
+    if (input$b_mode == "green_taxi_by_year") {
+      print("For the green taxi the green taxi trip lengths by year, we can see the trip length incresed from 2013 to 2015 and decresed from 2015 to 2016.")
+    }
+  })
   output$plot3 <- renderPlot({
-      if (input$c_mode == "yellow_taxi_in_different_areas") {
-        
-        graph <- ggplot(data=trip_area_melt,
-                        aes(x=Year, y=value, colour=variable)) +
-          geom_line() + geom_point() +
-          labs(title="Plot of Yellow Trip Length of different areas",x="Year", y = "Trip Length")
-        print(graph)
-       }
+    if (input$c_mode == "yellow_taxi_in_different_areas") {
+      
+      graph <- ggplot(data=trip_area_melt,
+                      aes(x=Year, y=value, colour=variable)) +
+        geom_line() + geom_point() +
+        labs(title="Plot of Yellow Trip Length of different areas",x="Year", y = "Trip Length")
+      print(graph)
+    }
+  })
+  output$text3 <- renderPrint({
+    if (input$c_mode == "yellow_taxi_in_different_areas") {
+      print("According to the plot, the trip lengths of Yellow taxi has different trending in Manhattan and Airport from 2009 to 2015. The Airport trip lengths dicreased from 2010, but the trip lengths of Manhattan generally incresed from 2010 to 2015, especially from 2014 to 2015. However, the trip lengths of Manhattan decresed dramaticlly from the beginning of 2015.")
+    }
   })
 }
 
